@@ -31,12 +31,20 @@ extern "C" {
 /* ***************************************************************
 *  Compiler specifics
 *****************************************************************/
+/* ZSTD_DLL_STDCALL :
+*  Provide the ability to use stdcall linkage on public interface when building a Windows DLL */
+#if defined(_WIN32) && defined(ZSTD_DLL_STDCALL) && (ZSTD_DLL_STDCALL==1)
+#  define ZSTDLIB_STDCALL __stdcall
+#else
+#  define ZSTDLIB_STDCALL
+#endif
+
 /* ZSTD_DLL_EXPORT :
 *  Enable exporting of functions when building a Windows DLL */
 #if defined(_WIN32) && defined(ZSTD_DLL_EXPORT) && (ZSTD_DLL_EXPORT==1)
-#  define ZSTDLIB_API __declspec(dllexport)
+#  define ZSTDLIB_API(T) __declspec(dllexport) T ZSTDLIB_STDCALL
 #else
-#  define ZSTDLIB_API
+#  define ZSTDLIB_API(T) T ZSTDLIB_STDCALL
 #endif
 
 
@@ -50,15 +58,15 @@ extern "C" {
 *  frames created by one can be decoded by the other one */
 
 typedef struct ZBUFF_CCtx_s ZBUFF_CCtx;
-ZSTDLIB_API ZBUFF_CCtx* ZBUFF_createCCtx(void);
-ZSTDLIB_API size_t      ZBUFF_freeCCtx(ZBUFF_CCtx* cctx);
+ZSTDLIB_API(ZBUFF_CCtx*) ZBUFF_createCCtx(void);
+ZSTDLIB_API(size_t)      ZBUFF_freeCCtx(ZBUFF_CCtx* cctx);
 
-ZSTDLIB_API size_t ZBUFF_compressInit(ZBUFF_CCtx* cctx, int compressionLevel);
-ZSTDLIB_API size_t ZBUFF_compressInitDictionary(ZBUFF_CCtx* cctx, const void* dict, size_t dictSize, int compressionLevel);
+ZSTDLIB_API(size_t) ZBUFF_compressInit(ZBUFF_CCtx* cctx, int compressionLevel);
+ZSTDLIB_API(size_t) ZBUFF_compressInitDictionary(ZBUFF_CCtx* cctx, const void* dict, size_t dictSize, int compressionLevel);
 
-ZSTDLIB_API size_t ZBUFF_compressContinue(ZBUFF_CCtx* cctx, void* dst, size_t* dstCapacityPtr, const void* src, size_t* srcSizePtr);
-ZSTDLIB_API size_t ZBUFF_compressFlush(ZBUFF_CCtx* cctx, void* dst, size_t* dstCapacityPtr);
-ZSTDLIB_API size_t ZBUFF_compressEnd(ZBUFF_CCtx* cctx, void* dst, size_t* dstCapacityPtr);
+ZSTDLIB_API(size_t) ZBUFF_compressContinue(ZBUFF_CCtx* cctx, void* dst, size_t* dstCapacityPtr, const void* src, size_t* srcSizePtr);
+ZSTDLIB_API(size_t) ZBUFF_compressFlush(ZBUFF_CCtx* cctx, void* dst, size_t* dstCapacityPtr);
+ZSTDLIB_API(size_t) ZBUFF_compressEnd(ZBUFF_CCtx* cctx, void* dst, size_t* dstCapacityPtr);
 
 /*-*************************************************
 *  Streaming compression - howto
@@ -102,15 +110,15 @@ ZSTDLIB_API size_t ZBUFF_compressEnd(ZBUFF_CCtx* cctx, void* dst, size_t* dstCap
 
 
 typedef struct ZBUFF_DCtx_s ZBUFF_DCtx;
-ZSTDLIB_API ZBUFF_DCtx* ZBUFF_createDCtx(void);
-ZSTDLIB_API size_t      ZBUFF_freeDCtx(ZBUFF_DCtx* dctx);
+ZSTDLIB_API(ZBUFF_DCtx*) ZBUFF_createDCtx(void);
+ZSTDLIB_API(size_t)      ZBUFF_freeDCtx(ZBUFF_DCtx* dctx);
 
-ZSTDLIB_API size_t ZBUFF_decompressInit(ZBUFF_DCtx* dctx);
-ZSTDLIB_API size_t ZBUFF_decompressInitDictionary(ZBUFF_DCtx* dctx, const void* dict, size_t dictSize);
+ZSTDLIB_API(size_t) ZBUFF_decompressInit(ZBUFF_DCtx* dctx);
+ZSTDLIB_API(size_t) ZBUFF_decompressInitDictionary(ZBUFF_DCtx* dctx, const void* dict, size_t dictSize);
 
-ZSTDLIB_API size_t ZBUFF_decompressContinue(ZBUFF_DCtx* dctx,
-                                            void* dst, size_t* dstCapacityPtr,
-                                      const void* src, size_t* srcSizePtr);
+ZSTDLIB_API(size_t) ZBUFF_decompressContinue(ZBUFF_DCtx* dctx,
+                                             void* dst, size_t* dstCapacityPtr,
+                                       const void* src, size_t* srcSizePtr);
 
 /*-***************************************************************************
 *  Streaming decompression howto
@@ -141,15 +149,15 @@ ZSTDLIB_API size_t ZBUFF_decompressContinue(ZBUFF_DCtx* dctx,
 /* *************************************
 *  Tool functions
 ***************************************/
-ZSTDLIB_API unsigned ZBUFF_isError(size_t errorCode);
-ZSTDLIB_API const char* ZBUFF_getErrorName(size_t errorCode);
+ZSTDLIB_API(unsigned) ZBUFF_isError(size_t errorCode);
+ZSTDLIB_API(const char*) ZBUFF_getErrorName(size_t errorCode);
 
 /** Functions below provide recommended buffer sizes for Compression or Decompression operations.
 *   These sizes are just hints, they tend to offer better latency */
-ZSTDLIB_API size_t ZBUFF_recommendedCInSize(void);
-ZSTDLIB_API size_t ZBUFF_recommendedCOutSize(void);
-ZSTDLIB_API size_t ZBUFF_recommendedDInSize(void);
-ZSTDLIB_API size_t ZBUFF_recommendedDOutSize(void);
+ZSTDLIB_API(size_t) ZBUFF_recommendedCInSize(void);
+ZSTDLIB_API(size_t) ZBUFF_recommendedCOutSize(void);
+ZSTDLIB_API(size_t) ZBUFF_recommendedDInSize(void);
+ZSTDLIB_API(size_t) ZBUFF_recommendedDOutSize(void);
 
 
 #ifdef ZBUFF_STATIC_LINKING_ONLY
@@ -169,15 +177,15 @@ ZSTDLIB_API size_t ZBUFF_recommendedDOutSize(void);
 /*--- Custom memory allocator ---*/
 /*! ZBUFF_createCCtx_advanced() :
  *  Create a ZBUFF compression context using external alloc and free functions */
-ZSTDLIB_API ZBUFF_CCtx* ZBUFF_createCCtx_advanced(ZSTD_customMem customMem);
+ZSTDLIB_API(ZBUFF_CCtx*) ZBUFF_createCCtx_advanced(ZSTD_customMem customMem);
 
 /*! ZBUFF_createDCtx_advanced() :
  *  Create a ZBUFF decompression context using external alloc and free functions */
-ZSTDLIB_API ZBUFF_DCtx* ZBUFF_createDCtx_advanced(ZSTD_customMem customMem);
+ZSTDLIB_API(ZBUFF_DCtx*) ZBUFF_createDCtx_advanced(ZSTD_customMem customMem);
 
 
 /*--- Advanced Streaming Initialization ---*/
-ZSTDLIB_API size_t ZBUFF_compressInit_advanced(ZBUFF_CCtx* zbc,
+ZSTDLIB_API(size_t) ZBUFF_compressInit_advanced(ZBUFF_CCtx* zbc,
                                                const void* dict, size_t dictSize,
                                                ZSTD_parameters params, U64 pledgedSrcSize);
 

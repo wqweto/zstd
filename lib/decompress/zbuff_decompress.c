@@ -41,12 +41,12 @@ struct ZBUFF_DCtx_s {
 };   /* typedef'd to ZBUFF_DCtx within "zbuff.h" */
 
 
-ZBUFF_DCtx* ZBUFF_createDCtx(void)
+ZSTDLIB_API(ZBUFF_DCtx*) ZBUFF_createDCtx(void)
 {
     return ZBUFF_createDCtx_advanced(defaultCustomMem);
 }
 
-ZBUFF_DCtx* ZBUFF_createDCtx_advanced(ZSTD_customMem customMem)
+ZSTDLIB_API(ZBUFF_DCtx*) ZBUFF_createDCtx_advanced(ZSTD_customMem customMem)
 {
     ZBUFF_DCtx* zbd;
 
@@ -66,7 +66,7 @@ ZBUFF_DCtx* ZBUFF_createDCtx_advanced(ZSTD_customMem customMem)
     return zbd;
 }
 
-size_t ZBUFF_freeDCtx(ZBUFF_DCtx* zbd)
+ZSTDLIB_API(size_t) ZBUFF_freeDCtx(ZBUFF_DCtx* zbd)
 {
     if (zbd==NULL) return 0;   /* support free on null */
     ZSTD_freeDCtx(zbd->zd);
@@ -79,14 +79,14 @@ size_t ZBUFF_freeDCtx(ZBUFF_DCtx* zbd)
 
 /* *** Initialization *** */
 
-size_t ZBUFF_decompressInitDictionary(ZBUFF_DCtx* zbd, const void* dict, size_t dictSize)
+ZSTDLIB_API(size_t) ZBUFF_decompressInitDictionary(ZBUFF_DCtx* zbd, const void* dict, size_t dictSize)
 {
     zbd->stage = ZBUFFds_loadHeader;
     zbd->lhSize = zbd->inPos = zbd->outStart = zbd->outEnd = 0;
     return ZSTD_decompressBegin_usingDict(zbd->zd, dict, dictSize);
 }
 
-size_t ZBUFF_decompressInit(ZBUFF_DCtx* zbd)
+ZSTDLIB_API(size_t) ZBUFF_decompressInit(ZBUFF_DCtx* zbd)
 {
     return ZBUFF_decompressInitDictionary(zbd, NULL, 0);
 }
@@ -103,7 +103,7 @@ MEM_STATIC size_t ZBUFF_limitCopy(void* dst, size_t dstCapacity, const void* src
 
 /* *** Decompression *** */
 
-size_t ZBUFF_decompressContinue(ZBUFF_DCtx* zbd,
+ZSTDLIB_API(size_t) ZBUFF_decompressContinue(ZBUFF_DCtx* zbd,
                                 void* dst, size_t* dstCapacityPtr,
                           const void* src, size_t* srcSizePtr)
 {
@@ -248,5 +248,5 @@ size_t ZBUFF_decompressContinue(ZBUFF_DCtx* zbd,
 /* *************************************
 *  Tool functions
 ***************************************/
-size_t ZBUFF_recommendedDInSize(void)  { return ZSTD_BLOCKSIZE_ABSOLUTEMAX + ZSTD_blockHeaderSize /* block header size*/ ; }
-size_t ZBUFF_recommendedDOutSize(void) { return ZSTD_BLOCKSIZE_ABSOLUTEMAX; }
+ZSTDLIB_API(size_t) ZBUFF_recommendedDInSize(void)  { return ZSTD_BLOCKSIZE_ABSOLUTEMAX + ZSTD_blockHeaderSize /* block header size*/ ; }
+ZSTDLIB_API(size_t) ZBUFF_recommendedDOutSize(void) { return ZSTD_BLOCKSIZE_ABSOLUTEMAX; }

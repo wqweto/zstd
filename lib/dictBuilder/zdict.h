@@ -21,13 +21,23 @@ extern "C" {
 
 /*======  Export for Windows  ======*/
 /*!
+*  ZSTD_DLL_STDCALL :
+*  Provide the ability to use stdcall linkage on public interface when building a Windows DLL
+*/
+#if defined(_WIN32) && defined(ZSTD_DLL_STDCALL) && (ZSTD_DLL_STDCALL==1)
+#  define ZSTDLIB_STDCALL __stdcall
+#else
+#  define ZSTDLIB_STDCALL
+#endif
+
+/*!
 *  ZSTD_DLL_EXPORT :
 *  Enable exporting of functions when building a Windows DLL
 */
 #if defined(_WIN32) && defined(ZSTD_DLL_EXPORT) && (ZSTD_DLL_EXPORT==1)
-#  define ZDICTLIB_API __declspec(dllexport)
+#  define ZSTDLIB_API(T) __declspec(dllexport) T ZSTDLIB_STDCALL
 #else
-#  define ZDICTLIB_API
+#  define ZSTDLIB_API(T) T ZSTDLIB_STDCALL
 #endif
 
 

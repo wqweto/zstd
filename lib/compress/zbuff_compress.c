@@ -79,12 +79,12 @@ struct ZBUFF_CCtx_s {
     ZSTD_customMem customMem;
 };   /* typedef'd tp ZBUFF_CCtx within "zbuff.h" */
 
-ZBUFF_CCtx* ZBUFF_createCCtx(void)
+ZSTDLIB_API(ZBUFF_CCtx*) ZBUFF_createCCtx(void)
 {
     return ZBUFF_createCCtx_advanced(defaultCustomMem);
 }
 
-ZBUFF_CCtx* ZBUFF_createCCtx_advanced(ZSTD_customMem customMem)
+ZSTDLIB_API(ZBUFF_CCtx*) ZBUFF_createCCtx_advanced(ZSTD_customMem customMem)
 {
     ZBUFF_CCtx* zbc;
 
@@ -103,7 +103,7 @@ ZBUFF_CCtx* ZBUFF_createCCtx_advanced(ZSTD_customMem customMem)
     return zbc;
 }
 
-size_t ZBUFF_freeCCtx(ZBUFF_CCtx* zbc)
+ZSTDLIB_API(size_t) ZBUFF_freeCCtx(ZBUFF_CCtx* zbc)
 {
     if (zbc==NULL) return 0;   /* support free on NULL */
     ZSTD_freeCCtx(zbc->zc);
@@ -116,9 +116,9 @@ size_t ZBUFF_freeCCtx(ZBUFF_CCtx* zbc)
 
 /* ======   Initialization   ====== */
 
-size_t ZBUFF_compressInit_advanced(ZBUFF_CCtx* zbc,
-                                   const void* dict, size_t dictSize,
-                                   ZSTD_parameters params, U64 pledgedSrcSize)
+ZSTDLIB_API(size_t) ZBUFF_compressInit_advanced(ZBUFF_CCtx* zbc,
+                                               const void* dict, size_t dictSize,
+                                               ZSTD_parameters params, U64 pledgedSrcSize)
 {
     /* allocate buffers */
     {   size_t const neededInBuffSize = (size_t)1 << params.cParams.windowLog;
@@ -151,13 +151,13 @@ size_t ZBUFF_compressInit_advanced(ZBUFF_CCtx* zbc,
 }
 
 
-size_t ZBUFF_compressInitDictionary(ZBUFF_CCtx* zbc, const void* dict, size_t dictSize, int compressionLevel)
+ZSTDLIB_API(size_t) ZBUFF_compressInitDictionary(ZBUFF_CCtx* zbc, const void* dict, size_t dictSize, int compressionLevel)
 {
     ZSTD_parameters const params = ZSTD_getParams(compressionLevel, 0, dictSize);
     return ZBUFF_compressInit_advanced(zbc, dict, dictSize, params, 0);
 }
 
-size_t ZBUFF_compressInit(ZBUFF_CCtx* zbc, int compressionLevel)
+ZSTDLIB_API(size_t) ZBUFF_compressInit(ZBUFF_CCtx* zbc, int compressionLevel)
 {
     return ZBUFF_compressInitDictionary(zbc, NULL, 0, compressionLevel);
 }
@@ -257,9 +257,9 @@ static size_t ZBUFF_compressContinue_generic(ZBUFF_CCtx* zbc,
     }
 }
 
-size_t ZBUFF_compressContinue(ZBUFF_CCtx* zbc,
-                              void* dst, size_t* dstCapacityPtr,
-                        const void* src, size_t* srcSizePtr)
+ZSTDLIB_API(size_t) ZBUFF_compressContinue(ZBUFF_CCtx* zbc,
+                                          void* dst, size_t* dstCapacityPtr,
+                                    const void* src, size_t* srcSizePtr)
 {
     return ZBUFF_compressContinue_generic(zbc, dst, dstCapacityPtr, src, srcSizePtr, zbf_gather);
 }
@@ -268,7 +268,7 @@ size_t ZBUFF_compressContinue(ZBUFF_CCtx* zbc,
 
 /* ======   Finalize   ====== */
 
-size_t ZBUFF_compressFlush(ZBUFF_CCtx* zbc, void* dst, size_t* dstCapacityPtr)
+ZSTDLIB_API(size_t) ZBUFF_compressFlush(ZBUFF_CCtx* zbc, void* dst, size_t* dstCapacityPtr)
 {
     size_t srcSize = 0;
     ZBUFF_compressContinue_generic(zbc, dst, dstCapacityPtr, &srcSize, &srcSize, zbf_flush);  /* use a valid src address instead of NULL */
@@ -276,7 +276,7 @@ size_t ZBUFF_compressFlush(ZBUFF_CCtx* zbc, void* dst, size_t* dstCapacityPtr)
 }
 
 
-size_t ZBUFF_compressEnd(ZBUFF_CCtx* zbc, void* dst, size_t* dstCapacityPtr)
+ZSTDLIB_API(size_t) ZBUFF_compressEnd(ZBUFF_CCtx* zbc, void* dst, size_t* dstCapacityPtr)
 {
     BYTE* const ostart = (BYTE*)dst;
     BYTE* const oend = ostart + *dstCapacityPtr;
@@ -315,5 +315,5 @@ size_t ZBUFF_compressEnd(ZBUFF_CCtx* zbc, void* dst, size_t* dstCapacityPtr)
 /* *************************************
 *  Tool functions
 ***************************************/
-size_t ZBUFF_recommendedCInSize(void)  { return ZSTD_BLOCKSIZE_ABSOLUTEMAX; }
-size_t ZBUFF_recommendedCOutSize(void) { return ZSTD_compressBound(ZSTD_BLOCKSIZE_ABSOLUTEMAX) + ZSTD_blockHeaderSize + ZBUFF_endFrameSize; }
+ZSTDLIB_API(size_t) ZBUFF_recommendedCInSize(void)  { return ZSTD_BLOCKSIZE_ABSOLUTEMAX; }
+ZSTDLIB_API(size_t) ZBUFF_recommendedCOutSize(void) { return ZSTD_compressBound(ZSTD_BLOCKSIZE_ABSOLUTEMAX) + ZSTD_blockHeaderSize + ZBUFF_endFrameSize; }

@@ -3,7 +3,7 @@ setlocal
 :: call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\vcvars32.bat"
 :: call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\amd64\vcvars64.bat"
 set lib_name=zstdlib-x86
-set cl_exe=cl.exe /DZSTD_DLL_STDCALL=1 /DZSTD_DLL_EXPORT=1
+set cl_exe=cl.exe /DZSTD_DLL_STDCALL=1
 set cl_flags=/MT /LD /O2 /Ox
 set link_flags=/link /base:0x3f400000 /version:1.0 /incremental:no /opt:ref /merge:.rdata=.text /ignore:4078,4010
 set src_dir=..\..\lib

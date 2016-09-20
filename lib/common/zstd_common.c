@@ -22,7 +22,7 @@
 /*-****************************************
 *  Version
 ******************************************/
-unsigned ZSTD_versionNumber (void) { return ZSTD_VERSION_NUMBER; }
+ZSTDLIB_API(unsigned) ZSTD_versionNumber (void) { return ZSTD_VERSION_NUMBER; }
 
 
 /*-****************************************
@@ -30,11 +30,11 @@ unsigned ZSTD_versionNumber (void) { return ZSTD_VERSION_NUMBER; }
 ******************************************/
 /*! ZSTD_isError() :
 *   tells if a return value is an error code */
-unsigned ZSTD_isError(size_t code) { return ERR_isError(code); }
+ZSTDLIB_API(unsigned) ZSTD_isError(size_t code) { return ERR_isError(code); }
 
 /*! ZSTD_getErrorName() :
 *   provides error code string from function result (useful for debugging) */
-const char* ZSTD_getErrorName(size_t code) { return ERR_getErrorName(code); }
+ZSTDLIB_API(const char*) ZSTD_getErrorName(size_t code) { return ERR_getErrorName(code); }
 
 /*! ZSTD_getError() :
 *   convert a `size_t` function result into a proper ZSTD_errorCode enum */
@@ -48,9 +48,9 @@ const char* ZSTD_getErrorString(ZSTD_ErrorCode code) { return ERR_getErrorName(c
 /* **************************************************************
 *  ZBUFF Error Management
 ****************************************************************/
-unsigned ZBUFF_isError(size_t errorCode) { return ERR_isError(errorCode); }
+ZSTDLIB_API(unsigned) ZBUFF_isError(size_t errorCode) { return ERR_isError(errorCode); }
 
-const char* ZBUFF_getErrorName(size_t errorCode) { return ERR_getErrorName(errorCode); }
+ZSTDLIB_API(const char*) ZBUFF_getErrorName(size_t errorCode) { return ERR_getErrorName(errorCode); }
 
 
 
