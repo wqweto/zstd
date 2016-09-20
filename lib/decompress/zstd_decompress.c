@@ -287,7 +287,7 @@ size_t ZSTD_getFrameParams(ZSTD_frameParams* fparamsPtr, const void* src, size_t
                    - decompressed size is not present within frame header
                    - frame header unknown / not supported
                    - frame header not complete (`srcSize` too small) */
-unsigned long long ZSTD_getDecompressedSize(const void* src, size_t srcSize)
+U64 ZSTD_getDecompressedSize(const void* src, size_t srcSize)
 {
 #if defined(ZSTD_LEGACY_SUPPORT) && (ZSTD_LEGACY_SUPPORT==1)
     if (ZSTD_isLegacy(src, srcSize)) return ZSTD_getDecompressedSize_legacy(src, srcSize);

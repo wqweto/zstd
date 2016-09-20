@@ -44,6 +44,12 @@ extern "C" {
 ZSTDLIB_API unsigned ZSTD_versionNumber (void);
 
 
+#if defined(_MSC_VER) && (_MSC_VER < 1400)
+    typedef unsigned __int64   U64;
+#else
+    typedef unsigned long long U64;
+#endif
+
 /* *************************************
 *  Simple API
 ***************************************/
@@ -81,7 +87,7 @@ ZSTDLIB_API size_t ZSTD_decompress( void* dst, size_t dstCapacity,
 *             Always ensure result fits within application's authorized limits.
 *             Each application can set its own limits.
 *    note 5 : when `return==0`, if precise failure cause is needed, use ZSTD_getFrameParams() to know more. */
-ZSTDLIB_API unsigned long long ZSTD_getDecompressedSize(const void* src, size_t srcSize);
+ZSTDLIB_API U64 ZSTD_getDecompressedSize(const void* src, size_t srcSize);
 
 
 /*======  Helper functions  ======*/
@@ -368,12 +374,12 @@ ZSTDLIB_API size_t ZSTD_sizeof_CDict(const ZSTD_CDict* cdict);
 /*! ZSTD_getParams() :
 *   same as ZSTD_getCParams(), but @return a full `ZSTD_parameters` object instead of a `ZSTD_compressionParameters`.
 *   All fields of `ZSTD_frameParameters` are set to default (0) */
-ZSTDLIB_API ZSTD_parameters ZSTD_getParams(int compressionLevel, unsigned long long srcSize, size_t dictSize);
+ZSTDLIB_API ZSTD_parameters ZSTD_getParams(int compressionLevel, U64 srcSize, size_t dictSize);
 
 /*! ZSTD_getCParams() :
 *   @return ZSTD_compressionParameters structure for a selected compression level and srcSize.
 *   `srcSize` value is optional, select 0 if not known */
-ZSTDLIB_API ZSTD_compressionParameters ZSTD_getCParams(int compressionLevel, unsigned long long srcSize, size_t dictSize);
+ZSTDLIB_API ZSTD_compressionParameters ZSTD_getCParams(int compressionLevel, U64 srcSize, size_t dictSize);
 
 /*! ZSTD_checkCParams() :
 *   Ensure param values remain within authorized range */
@@ -382,7 +388,7 @@ ZSTDLIB_API size_t ZSTD_checkCParams(ZSTD_compressionParameters params);
 /*! ZSTD_adjustCParams() :
 *   optimize params for a given `srcSize` and `dictSize`.
 *   both values are optional, select `0` if unknown. */
-ZSTDLIB_API ZSTD_compressionParameters ZSTD_adjustCParams(ZSTD_compressionParameters cPar, unsigned long long srcSize, size_t dictSize);
+ZSTDLIB_API ZSTD_compressionParameters ZSTD_adjustCParams(ZSTD_compressionParameters cPar, U64 srcSize, size_t dictSize);
 
 /*! ZSTD_compress_advanced() :
 *   Same as ZSTD_compress_usingDict(), with fine-tune control of each compression parameter */
@@ -421,8 +427,8 @@ ZSTDLIB_API size_t ZSTD_sizeof_DDict(const ZSTD_DDict* ddict);
 ZSTDLIB_API ZSTD_CStream* ZSTD_createCStream_advanced(ZSTD_customMem customMem);
 ZSTDLIB_API size_t ZSTD_initCStream_usingDict(ZSTD_CStream* zcs, const void* dict, size_t dictSize, int compressionLevel);
 ZSTDLIB_API size_t ZSTD_initCStream_advanced(ZSTD_CStream* zcs, const void* dict, size_t dictSize,
-                                             ZSTD_parameters params, unsigned long long pledgedSrcSize);  /**< pledgedSrcSize is optional and can be zero == unknown */
-ZSTDLIB_API size_t ZSTD_resetCStream(ZSTD_CStream* zcs, unsigned long long pledgedSrcSize);  /**< re-use compression parameters from previous init; saves dictionary loading */
+                                             ZSTD_parameters params, U64 pledgedSrcSize);  /**< pledgedSrcSize is optional and can be zero == unknown */
+ZSTDLIB_API size_t ZSTD_resetCStream(ZSTD_CStream* zcs, U64 pledgedSrcSize);  /**< re-use compression parameters from previous init; saves dictionary loading */
 ZSTDLIB_API size_t ZSTD_sizeof_CStream(const ZSTD_CStream* zcs);
 
 
@@ -446,7 +452,7 @@ ZSTDLIB_API size_t ZSTD_sizeof_DStream(const ZSTD_DStream* zds);
 
 ZSTDLIB_API size_t ZSTD_compressBegin(ZSTD_CCtx* cctx, int compressionLevel);
 ZSTDLIB_API size_t ZSTD_compressBegin_usingDict(ZSTD_CCtx* cctx, const void* dict, size_t dictSize, int compressionLevel);
-ZSTDLIB_API size_t ZSTD_compressBegin_advanced(ZSTD_CCtx* cctx, const void* dict, size_t dictSize, ZSTD_parameters params, unsigned long long pledgedSrcSize);
+ZSTDLIB_API size_t ZSTD_compressBegin_advanced(ZSTD_CCtx* cctx, const void* dict, size_t dictSize, ZSTD_parameters params, U64 pledgedSrcSize);
 ZSTDLIB_API size_t ZSTD_copyCCtx(ZSTD_CCtx* cctx, const ZSTD_CCtx* preparedCCtx);
 
 ZSTDLIB_API size_t ZSTD_compressContinue(ZSTD_CCtx* cctx, void* dst, size_t dstCapacity, const void* src, size_t srcSize);
@@ -482,7 +488,7 @@ ZSTDLIB_API size_t ZSTD_compressEnd(ZSTD_CCtx* cctx, void* dst, size_t dstCapaci
 */
 
 typedef struct {
-    unsigned long long frameContentSize;
+    U64 frameContentSize;
     unsigned windowSize;
     unsigned dictID;
     unsigned checksumFlag;

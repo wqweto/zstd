@@ -132,20 +132,32 @@ static void* XXH_memcpy(void* dest, const void* src, size_t size) { return memcp
 ***************************************/
 #ifndef MEM_MODULE
 # define MEM_MODULE
-# if !defined (__VMS) && (defined (__cplusplus) || (defined (__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L) /* C99 */) )
+# if defined(_MSC_VER) && (_MSC_VER < 1400)
+    typedef unsigned char      BYTE;
+    typedef unsigned short     U16;
+    typedef unsigned int       U32;
+    typedef   signed int       S32;
+    typedef unsigned __int64   U64;
+    #define CONST_S64(x) x##i64
+    #define CONST_U64(x) x##ui64
+# elif !defined (__VMS) && (defined (__cplusplus) || (defined (__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L) /* C99 */) )
 #   include <stdint.h>
     typedef uint8_t  BYTE;
     typedef uint16_t U16;
     typedef uint32_t U32;
     typedef  int32_t S32;
     typedef uint64_t U64;
-#  else
+    #define CONST_S64(x) x##LL
+    #define CONST_U64(x) x##ULL
+# else
     typedef unsigned char      BYTE;
     typedef unsigned short     U16;
     typedef unsigned int       U32;
     typedef   signed int       S32;
     typedef unsigned long long U64;   /* if your compiler doesn't support unsigned long long, replace by another 64-bit type here. Note that xxhash.h will also need to be updated. */
-#  endif
+    #define CONST_S64(x) x##LL
+    #define CONST_U64(x) x##ULL
+# endif
 #endif
 
 
@@ -193,7 +205,7 @@ static U64 XXH_read64(const void* memPtr)
 #define GCC_VERSION (__GNUC__ * 100 + __GNUC_MINOR__)
 
 /* Note : although _rotl exists for minGW (GCC under windows), performance seems poor */
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) && (_MSC_VER >= 1400)
 #  define XXH_rotl32(x,r) _rotl(x,r)
 #  define XXH_rotl64(x,r) _rotl64(x,r)
 #else
@@ -201,7 +213,7 @@ static U64 XXH_read64(const void* memPtr)
 #  define XXH_rotl64(x,r) ((x << r) | (x >> (64 - r)))
 #endif
 
-#if defined(_MSC_VER)     /* Visual Studio */
+#if defined(_MSC_VER) && (_MSC_VER >= 1400)     /* Visual Studio */
 #  define XXH_swap32 _byteswap_ulong
 #  define XXH_swap64 _byteswap_uint64
 #elif GCC_VERSION >= 403
@@ -217,14 +229,14 @@ static U32 XXH_swap32 (U32 x)
 }
 static U64 XXH_swap64 (U64 x)
 {
-    return  ((x << 56) & 0xff00000000000000ULL) |
-            ((x << 40) & 0x00ff000000000000ULL) |
-            ((x << 24) & 0x0000ff0000000000ULL) |
-            ((x << 8)  & 0x000000ff00000000ULL) |
-            ((x >> 8)  & 0x00000000ff000000ULL) |
-            ((x >> 24) & 0x0000000000ff0000ULL) |
-            ((x >> 40) & 0x000000000000ff00ULL) |
-            ((x >> 56) & 0x00000000000000ffULL);
+    return  ((x << 56) & CONST_U64(0xff00000000000000)) |
+            ((x << 40) & CONST_U64(0x00ff000000000000)) |
+            ((x << 24) & CONST_U64(0x0000ff0000000000)) |
+            ((x << 8)  & CONST_U64(0x000000ff00000000)) |
+            ((x >> 8)  & CONST_U64(0x00000000ff000000)) |
+            ((x >> 24) & CONST_U64(0x0000000000ff0000)) |
+            ((x >> 40) & CONST_U64(0x000000000000ff00)) |
+            ((x >> 56) & CONST_U64(0x00000000000000ff));
 }
 #endif
 
@@ -298,11 +310,11 @@ static const U32 PRIME32_3 = 3266489917U;
 static const U32 PRIME32_4 =  668265263U;
 static const U32 PRIME32_5 =  374761393U;
 
-static const U64 PRIME64_1 = 11400714785074694791ULL;
-static const U64 PRIME64_2 = 14029467366897019727ULL;
-static const U64 PRIME64_3 =  1609587929392839161ULL;
-static const U64 PRIME64_4 =  9650029242287828579ULL;
-static const U64 PRIME64_5 =  2870177450012600261ULL;
+static const U64 PRIME64_1 = CONST_U64(11400714785074694791);
+static const U64 PRIME64_2 = CONST_U64(14029467366897019727);
+static const U64 PRIME64_3 = CONST_U64( 1609587929392839161);
+static const U64 PRIME64_4 = CONST_U64( 9650029242287828579);
+static const U64 PRIME64_5 = CONST_U64( 2870177450012600261);
 
 XXH_PUBLIC_API unsigned XXH_versionNumber (void) { return XXH_VERSION_NUMBER; }
 
@@ -502,7 +514,7 @@ FORCE_INLINE U64 XXH64_endian_align(const void* input, size_t len, U64 seed, XXH
 }
 
 
-XXH_PUBLIC_API unsigned long long XXH64 (const void* input, size_t len, unsigned long long seed)
+XXH_PUBLIC_API U64 XXH64 (const void* input, size_t len, U64 seed)
 {
 #if 0
     /* Simple version, good for code maintenance, but unfortunately slow for small inputs */
@@ -569,7 +581,7 @@ XXH_PUBLIC_API XXH_errorcode XXH32_reset(XXH32_state_t* statePtr, unsigned int s
 }
 
 
-XXH_PUBLIC_API XXH_errorcode XXH64_reset(XXH64_state_t* statePtr, unsigned long long seed)
+XXH_PUBLIC_API XXH_errorcode XXH64_reset(XXH64_state_t* statePtr, U64 seed)
 {
     XXH64_state_t state;   /* using a local state to memcpy() in order to avoid strict-aliasing warnings */
     memset(&state, 0, sizeof(state)-8);   /* do not write into reserved, for future removal */
@@ -821,7 +833,7 @@ FORCE_INLINE U64 XXH64_digest_endian (const XXH64_state_t* state, XXH_endianess 
 }
 
 
-XXH_PUBLIC_API unsigned long long XXH64_digest (const XXH64_state_t* state_in)
+XXH_PUBLIC_API U64 XXH64_digest (const XXH64_state_t* state_in)
 {
     XXH_endianess endian_detected = (XXH_endianess)XXH_CPU_LITTLE_ENDIAN;
 

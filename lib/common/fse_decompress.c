@@ -38,7 +38,9 @@
 ****************************************************************/
 #ifdef _MSC_VER    /* Visual Studio */
 #  define FORCE_INLINE static __forceinline
-#  include <intrin.h>                    /* For Visual 2005 */
+#  if _MSC_VER >= 1400
+#    include <intrin.h>                  /* For Visual 2005 */
+#  endif
 #  pragma warning(disable : 4127)        /* disable: C4127: conditional expression is constant */
 #  pragma warning(disable : 4214)        /* disable: C4214: non-int bitfields */
 #else

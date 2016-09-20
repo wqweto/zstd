@@ -161,11 +161,16 @@ XXH_PUBLIC_API unsigned XXH_versionNumber (void);
 /* ****************************
 *  Simple Hash Functions
 ******************************/
+#if defined(_MSC_VER) && (_MSC_VER < 1400)
+    typedef unsigned __int64   U64;
+#else
+    typedef unsigned long long U64;
+#endif
 typedef unsigned int       XXH32_hash_t;
-typedef unsigned long long XXH64_hash_t;
+typedef U64                XXH64_hash_t;
 
 XXH_PUBLIC_API XXH32_hash_t XXH32 (const void* input, size_t length, unsigned int seed);
-XXH_PUBLIC_API XXH64_hash_t XXH64 (const void* input, size_t length, unsigned long long seed);
+XXH_PUBLIC_API XXH64_hash_t XXH64 (const void* input, size_t length, U64 seed);
 
 /*!
 XXH32() :
@@ -201,7 +206,7 @@ XXH_PUBLIC_API XXH_errorcode XXH32_reset  (XXH32_state_t* statePtr, unsigned int
 XXH_PUBLIC_API XXH_errorcode XXH32_update (XXH32_state_t* statePtr, const void* input, size_t length);
 XXH_PUBLIC_API XXH32_hash_t  XXH32_digest (const XXH32_state_t* statePtr);
 
-XXH_PUBLIC_API XXH_errorcode XXH64_reset  (XXH64_state_t* statePtr, unsigned long long seed);
+XXH_PUBLIC_API XXH_errorcode XXH64_reset  (XXH64_state_t* statePtr, U64 seed);
 XXH_PUBLIC_API XXH_errorcode XXH64_update (XXH64_state_t* statePtr, const void* input, size_t length);
 XXH_PUBLIC_API XXH64_hash_t  XXH64_digest (const XXH64_state_t* statePtr);
 
@@ -284,12 +289,12 @@ XXH_PUBLIC_API XXH64_hash_t XXH64_hashFromCanonical(const XXH64_canonical_t* src
    };   /* typedef'd to XXH32_state_t */
 
    struct XXH64_state_s {
-       unsigned long long total_len;
-       unsigned long long v1;
-       unsigned long long v2;
-       unsigned long long v3;
-       unsigned long long v4;
-       unsigned long long mem64[4];   /* buffer defined as U64 for alignment */
+       U64 total_len;
+       U64 v1;
+       U64 v2;
+       U64 v3;
+       U64 v4;
+       U64 mem64[4];   /* buffer defined as U64 for alignment */
        unsigned memsize;
        unsigned reserved[2];          /* never read nor write, will be removed in a future version */
    };   /* typedef'd to XXH64_state_t */

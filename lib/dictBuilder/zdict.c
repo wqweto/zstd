@@ -70,8 +70,15 @@ static const size_t g_min_fast_dictContent = 192;
 /*-*************************************
 *  Console display
 ***************************************/
-#define DISPLAY(...)         { fprintf(stderr, __VA_ARGS__); fflush( stderr ); }
-#define DISPLAYLEVEL(l, ...) if (notificationLevel>=l) { DISPLAY(__VA_ARGS__); }    /* 0 : no display;   1: errors;   2: default;  3: details;  4: debug */
+#if defined(_MSC_VER) && (_MSC_VER < 1400)
+  void __inline impl_DISPLAY(...) { }
+  void __inline impl_DISPLAYLEVEL(...) { }
+  #define DISPLAY impl_DISPLAY
+  #define DISPLAYLEVEL impl_DISPLAYLEVEL
+#else
+  #define DISPLAY(...)         { fprintf(stderr, __VA_ARGS__); fflush( stderr ); }
+  #define DISPLAYLEVEL(l, ...) if (notificationLevel>=l) { DISPLAY(__VA_ARGS__); }    /* 0 : no display;   1: errors;   2: default;  3: details;  4: debug */
+#endif
 
 static clock_t ZDICT_clockSpan(clock_t nPrevious) { return clock() - nPrevious; }
 
@@ -109,7 +116,7 @@ static unsigned ZDICT_NbCommonBytes (register size_t val)
 {
     if (MEM_isLittleEndian()) {
         if (MEM_64bits()) {
-#       if defined(_MSC_VER) && defined(_WIN64)
+#       if defined(_MSC_VER) && (_MSC_VER >= 1400) && defined(_WIN64)
             unsigned long r = 0;
             _BitScanForward64( &r, (U64)val );
             return (unsigned)(r>>3);
@@ -117,10 +124,10 @@ static unsigned ZDICT_NbCommonBytes (register size_t val)
             return (__builtin_ctzll((U64)val) >> 3);
 #       else
             static const int DeBruijnBytePos[64] = { 0, 0, 0, 0, 0, 1, 1, 2, 0, 3, 1, 3, 1, 4, 2, 7, 0, 2, 3, 6, 1, 5, 3, 5, 1, 3, 4, 4, 2, 5, 6, 7, 7, 0, 1, 2, 3, 3, 4, 6, 2, 6, 5, 5, 3, 4, 5, 6, 7, 1, 2, 4, 6, 4, 4, 5, 7, 2, 6, 5, 7, 6, 7, 7 };
-            return DeBruijnBytePos[((U64)((val & -(long long)val) * 0x0218A392CDABBD3FULL)) >> 58];
+            return DeBruijnBytePos[((U64)((val & -(S64)val) * CONST_U64(0x0218A392CDABBD3F))) >> 58];
 #       endif
         } else { /* 32 bits */
-#       if defined(_MSC_VER)
+#       if defined(_MSC_VER) && (_MSC_VER >= 1400)
             unsigned long r=0;
             _BitScanForward( &r, (U32)val );
             return (unsigned)(r>>3);
@@ -133,7 +140,7 @@ static unsigned ZDICT_NbCommonBytes (register size_t val)
         }
     } else {  /* Big Endian CPU */
         if (MEM_64bits()) {
-#       if defined(_MSC_VER) && defined(_WIN64)
+#       if defined(_MSC_VER) && (_MSC_VER >= 1400) && defined(_WIN64)
             unsigned long r = 0;
             _BitScanReverse64( &r, val );
             return (unsigned)(r>>3);
@@ -148,7 +155,7 @@ static unsigned ZDICT_NbCommonBytes (register size_t val)
             return r;
 #       endif
         } else { /* 32 bits */
-#       if defined(_MSC_VER)
+#       if defined(_MSC_VER) && (_MSC_VER >= 1400)
             unsigned long r = 0;
             _BitScanReverse( &r, (unsigned long)val );
             return (unsigned)(r>>3);

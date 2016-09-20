@@ -15,7 +15,9 @@
 *********************************************************/
 #ifdef _MSC_VER    /* Visual Studio */
 #  define FORCE_INLINE static __forceinline
-#  include <intrin.h>                    /* For Visual 2005 */
+#  if _MSC_VER >= 1400
+#    include <intrin.h>                    /* For Visual 2005 */
+#  endif
 #  pragma warning(disable : 4127)        /* disable: C4127: conditional expression is constant */
 #  pragma warning(disable : 4324)        /* disable: C4324: padded structure */
 #  pragma warning(disable : 4100)        /* disable: C4100: unreferenced formal parameter */
@@ -230,7 +232,7 @@ void ZSTD_free(void* ptr, ZSTD_customMem customMem);
 
 MEM_STATIC U32 ZSTD_highbit32(U32 val)
 {
-#   if defined(_MSC_VER)   /* Visual */
+#   if defined(_MSC_VER) && (_MSC_VER >= 1400)   /* Visual */
     unsigned long r=0;
     _BitScanReverse(&r, val);
     return (unsigned)r;

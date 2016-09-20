@@ -24,7 +24,7 @@ extern "C" {
 /*-****************************************
 *  Compiler specifics
 ******************************************/
-#if defined(_MSC_VER)   /* Visual Studio */
+#if defined(_MSC_VER) && (_MSC_VER >= 1400)   /* Visual Studio */
 #   include <stdlib.h>  /* _byteswap_ulong */
 #   include <intrin.h>  /* _byteswap_* */
 #endif
@@ -46,7 +46,17 @@ MEM_STATIC void MEM_check(void) { MEM_STATIC_ASSERT((sizeof(size_t)==4) || (size
 /*-**************************************************************
 *  Basic Types
 *****************************************************************/
-#if  !defined (__VMS) && (defined (__cplusplus) || (defined (__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L) /* C99 */) )
+#if defined(_MSC_VER) && (_MSC_VER < 1400)
+  typedef unsigned char       BYTE;
+  typedef unsigned short      U16;
+  typedef   signed short      S16;
+  typedef unsigned int        U32;
+  typedef   signed int        S32;
+  typedef unsigned __int64    U64;
+  typedef   signed __int64    S64;
+  #define CONST_S64(x) x##i64
+  #define CONST_U64(x) x##ui64
+#elif !defined (__VMS) && (defined (__cplusplus) || (defined (__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L) /* C99 */) )
 # include <stdint.h>
   typedef  uint8_t BYTE;
   typedef uint16_t U16;
@@ -55,6 +65,8 @@ MEM_STATIC void MEM_check(void) { MEM_STATIC_ASSERT((sizeof(size_t)==4) || (size
   typedef  int32_t S32;
   typedef uint64_t U64;
   typedef  int64_t S64;
+  #define CONST_S64(x) x##LL
+  #define CONST_U64(x) x##ULL
 #else
   typedef unsigned char       BYTE;
   typedef unsigned short      U16;
@@ -63,6 +75,8 @@ MEM_STATIC void MEM_check(void) { MEM_STATIC_ASSERT((sizeof(size_t)==4) || (size
   typedef   signed int        S32;
   typedef unsigned long long  U64;
   typedef   signed long long  S64;
+  #define CONST_S64(x) x##LL
+  #define CONST_U64(x) x##ULL
 #endif
 
 
@@ -178,7 +192,7 @@ MEM_STATIC void MEM_write64(void* memPtr, U64 value)
 
 MEM_STATIC U32 MEM_swap32(U32 in)
 {
-#if defined(_MSC_VER)     /* Visual Studio */
+#if defined(_MSC_VER) && (_MSC_VER >= 1400)     /* Visual Studio */
     return _byteswap_ulong(in);
 #elif defined (__GNUC__)
     return __builtin_bswap32(in);
@@ -192,19 +206,19 @@ MEM_STATIC U32 MEM_swap32(U32 in)
 
 MEM_STATIC U64 MEM_swap64(U64 in)
 {
-#if defined(_MSC_VER)     /* Visual Studio */
+#if defined(_MSC_VER) && (_MSC_VER >= 1400)     /* Visual Studio */
     return _byteswap_uint64(in);
 #elif defined (__GNUC__)
     return __builtin_bswap64(in);
 #else
-    return  ((in << 56) & 0xff00000000000000ULL) |
-            ((in << 40) & 0x00ff000000000000ULL) |
-            ((in << 24) & 0x0000ff0000000000ULL) |
-            ((in << 8)  & 0x000000ff00000000ULL) |
-            ((in >> 8)  & 0x00000000ff000000ULL) |
-            ((in >> 24) & 0x0000000000ff0000ULL) |
-            ((in >> 40) & 0x000000000000ff00ULL) |
-            ((in >> 56) & 0x00000000000000ffULL);
+    return  ((in << 56) & CONST_U64(0xff00000000000000)) |
+            ((in << 40) & CONST_U64(0x00ff000000000000)) |
+            ((in << 24) & CONST_U64(0x0000ff0000000000)) |
+            ((in << 8)  & CONST_U64(0x000000ff00000000)) |
+            ((in >> 8)  & CONST_U64(0x00000000ff000000)) |
+            ((in >> 24) & CONST_U64(0x0000000000ff0000)) |
+            ((in >> 40) & CONST_U64(0x000000000000ff00)) |
+            ((in >> 56) & CONST_U64(0x00000000000000ff));
 #endif
 }
 

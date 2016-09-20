@@ -153,7 +153,7 @@ MEM_STATIC size_t BIT_readBitsFast(BIT_DStream_t* bitD, unsigned nbBits);
 ****************************************************************/
 MEM_STATIC unsigned BIT_highbit32 (register U32 val)
 {
-#   if defined(_MSC_VER)   /* Visual */
+#   if defined(_MSC_VER) && (_MSC_VER >= 1400)   /* Visual */
     unsigned long r=0;
     _BitScanReverse ( &r, val );
     return (unsigned) r;
