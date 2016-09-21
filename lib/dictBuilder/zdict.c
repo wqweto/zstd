@@ -73,11 +73,17 @@ static const size_t g_min_fast_dictContent = 192;
 #if defined(_MSC_VER) && (_MSC_VER < 1400)
   void __inline impl_DISPLAY(...) { }
   void __inline impl_DISPLAYLEVEL(...) { }
+  void __inline impl_DISPLAYUPDATE(...) { }
   #define DISPLAY impl_DISPLAY
   #define DISPLAYLEVEL impl_DISPLAYLEVEL
+  #define DISPLAYUPDATE impl_DISPLAYUPDATE
 #else
   #define DISPLAY(...)         { fprintf(stderr, __VA_ARGS__); fflush( stderr ); }
   #define DISPLAYLEVEL(l, ...) if (notificationLevel>=l) { DISPLAY(__VA_ARGS__); }    /* 0 : no display;   1: errors;   2: default;  3: details;  4: debug */
+  #define DISPLAYUPDATE(l, ...) if (notificationLevel>=l) { \
+            if (ZDICT_clockSpan(displayClock) > refreshRate)  \
+            { displayClock = clock(); DISPLAY(__VA_ARGS__); \
+            if (notificationLevel>=4) fflush(stdout); } }
 #endif
 
 static clock_t ZDICT_clockSpan(clock_t nPrevious) { return clock() - nPrevious; }
@@ -97,11 +103,11 @@ static void ZDICT_printHex(const void* ptr, size_t length)
 /*-********************************************************
 *  Helper functions
 **********************************************************/
-unsigned ZDICT_isError(size_t errorCode) { return ERR_isError(errorCode); }
+ZDICTLIB_API(unsigned) ZDICT_isError(size_t errorCode) { return ERR_isError(errorCode); }
 
-const char* ZDICT_getErrorName(size_t errorCode) { return ERR_getErrorName(errorCode); }
+ZDICTLIB_API(const char*) ZDICT_getErrorName(size_t errorCode) { return ERR_getErrorName(errorCode); }
 
-unsigned ZDICT_getDictID(const void* dictBuffer, size_t dictSize)
+ZDICTLIB_API(unsigned) ZDICT_getDictID(const void* dictBuffer, size_t dictSize)
 {
     if (dictSize < 8) return 0;
     if (MEM_readLE32(dictBuffer) != ZSTD_DICT_MAGIC) return 0;
@@ -482,11 +488,6 @@ static size_t ZDICT_trainBuffer(dictItem* dictList, U32 dictListSize,
     size_t result = 0;
     clock_t displayClock = 0;
     clock_t const refreshRate = CLOCKS_PER_SEC * 3 / 10;
-
-#   define DISPLAYUPDATE(l, ...) if (notificationLevel>=l) { \
-            if (ZDICT_clockSpan(displayClock) > refreshRate)  \
-            { displayClock = clock(); DISPLAY(__VA_ARGS__); \
-            if (notificationLevel>=4) fflush(stdout); } }
 
     /* init */
     DISPLAYLEVEL(2, "\r%70s\r", "");   /* clean display line */
@@ -993,7 +994,7 @@ size_t ZDICT_trainFromBuffer_advanced(void* dictBuffer, size_t dictBufferCapacit
 }
 
 
-size_t ZDICT_trainFromBuffer(void* dictBuffer, size_t dictBufferCapacity,
+ZDICTLIB_API(size_t) ZDICT_trainFromBuffer(void* dictBuffer, size_t dictBufferCapacity,
                              const void* samplesBuffer, const size_t* samplesSizes, unsigned nbSamples)
 {
     ZDICT_params_t params;

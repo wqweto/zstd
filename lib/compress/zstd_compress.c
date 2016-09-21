@@ -1847,7 +1847,7 @@ void ZSTD_compressBlock_lazy_generic(ZSTD_CCtx* ctx,
 
     typedef size_t (*searchMax_f)(ZSTD_CCtx* zc, const BYTE* ip, const BYTE* const iLimit,
                         size_t* offsetPtr,
-                        U32 maxNbAttempts, U32 matchLengthSearch);
+                        const U32 maxNbAttempts, const U32 matchLengthSearch);
     searchMax_f const searchMax = searchMethod ? ZSTD_BtFindBestMatch_selectMLS : ZSTD_HcFindBestMatch_selectMLS;
     U32 offset_1 = ctx->rep[0], offset_2 = ctx->rep[1], savedOffset=0;
 
@@ -2009,7 +2009,7 @@ void ZSTD_compressBlock_lazy_extDict_generic(ZSTD_CCtx* ctx,
 
     typedef size_t (*searchMax_f)(ZSTD_CCtx* zc, const BYTE* ip, const BYTE* const iLimit,
                         size_t* offsetPtr,
-                        U32 maxNbAttempts, U32 matchLengthSearch);
+                        const U32 maxNbAttempts, const U32 matchLengthSearch);
     searchMax_f searchMax = searchMethod ? ZSTD_BtFindBestMatch_selectMLS_extDict : ZSTD_HcFindBestMatch_extDict_selectMLS;
 
     U32 offset_1 = ctx->rep[0], offset_2 = ctx->rep[1];

@@ -35,9 +35,9 @@ extern "C" {
 *  Enable exporting of functions when building a Windows DLL
 */
 #if defined(_WIN32) && defined(ZSTD_DLL_EXPORT) && (ZSTD_DLL_EXPORT==1)
-#  define ZSTDLIB_API(T) __declspec(dllexport) T ZSTDLIB_STDCALL
+#  define ZDICTLIB_API(T) __declspec(dllexport) T ZSTDLIB_STDCALL
 #else
-#  define ZSTDLIB_API(T) T ZSTDLIB_STDCALL
+#  define ZDICTLIB_API(T) T ZSTDLIB_STDCALL
 #endif
 
 
@@ -53,14 +53,14 @@ extern "C" {
            In general, it's recommended to provide a few thousands samples, but this can vary a lot.
            It's recommended that total size of all samples be about ~x100 times the target size of dictionary.
 */
-ZDICTLIB_API size_t ZDICT_trainFromBuffer(void* dictBuffer, size_t dictBufferCapacity,
+ZDICTLIB_API(size_t) ZDICT_trainFromBuffer(void* dictBuffer, size_t dictBufferCapacity,
                        const void* samplesBuffer, const size_t* samplesSizes, unsigned nbSamples);
 
 
 /*======   Helper functions   ======*/
-ZDICTLIB_API unsigned ZDICT_getDictID(const void* dictBuffer, size_t dictSize);  /**< extracts dictID; @return zero if error (not a valid dictionary) */
-ZDICTLIB_API unsigned ZDICT_isError(size_t errorCode);
-ZDICTLIB_API const char* ZDICT_getErrorName(size_t errorCode);
+ZDICTLIB_API(unsigned) ZDICT_getDictID(const void* dictBuffer, size_t dictSize);  /**< extracts dictID; @return zero if error (not a valid dictionary) */
+ZDICTLIB_API(unsigned) ZDICT_isError(size_t errorCode);
+ZDICTLIB_API(const char*) ZDICT_getErrorName(size_t errorCode);
 
 
 
